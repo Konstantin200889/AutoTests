@@ -1,18 +1,18 @@
 package org.example;
 
-import javax.swing.plaf.basic.BasicGraphicsUtils;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Scanner;
-
-
-public class Main {
-    public static void main(String[] args) {
-        Integer a = 24;
-        Integer b = 0;
-        Integer c = a / b;
+import org.DatabaseFunctions.DatabaseFunctions;
+import org.testng.annotations.Test;
+public class Main
+{
+    @Test
+    public void NewSelectUsers ()
+    {
+        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
+        databaseFunctions.selectUsers();
     }
+
 }
+
 
 
 /*
