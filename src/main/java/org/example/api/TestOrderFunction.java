@@ -8,7 +8,6 @@ import org.example.dto.TestOrder;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.Properties;
 
 import static io.restassured.RestAssured.given;
@@ -34,9 +33,8 @@ public class TestOrderFunction
     }
 
 
-    // map - специальная коллекция для хранения данных, которая хранит ключи, значения и даже классы(можно их передавать)
 
-    public TestOrder postFirstOrder(TestOrder body, Map<String, String> headers)
+    public TestOrder postOrder(TestOrder body, int headers)
     {
         Gson gson = new Gson();
         String StringRequestOrder = gson.toJson(body);
@@ -49,6 +47,9 @@ public class TestOrderFunction
                 then().statusCode(200).extract().response();
 
         return gson.fromJson(response.body().asString(), TestOrder.class);
+
+
+
     }
 }
 

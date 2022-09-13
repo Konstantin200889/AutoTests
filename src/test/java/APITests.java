@@ -2,8 +2,8 @@ import com.google.gson.Gson;
 import io.restassured.response.Response;
 import org.DatabaseFunctions.DatabaseFunctions;
 import org.apache.hc.core5.http.HttpStatus;
+import org.example.api.TestOrderFunction;
 import org.example.dto.TestOrder;
-import org.example.dto.TestOrder2;
 import org.example.dto.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 public class APITests {
 
-// параметризированный тест (подгружаем данные из файла test.csv и проверяем заполнение полей при помощи Assertions)
+// параметризированный тест (подгружаем данные из файла test.csv и проверяем корректность заполнение полей при помощи Assertions)
     @ParameterizedTest
     @CsvFileSource(resources = "/test.csv", useHeadersInDisplayName = true)
     void testWithCsvFileSourceAndHeaders(String Login, String Password, String Role) {
@@ -51,62 +51,70 @@ public class APITests {
     @Test
     public void postFirstOrder() {
 
-        TestOrder requestOrder = new TestOrder(); // заполняем параметры полей класса Order
-        requestOrder.setStatus("OPEN");
-        requestOrder.setCustomerName("Konstantin");
-        requestOrder.setCustomerPhone("2222222");
-        requestOrder.setComment("correct request");
+        TestOrder requestOrder = new TestOrder("OPEN", "Konstantin", "111111", "correct request"); // заполняем данные полей заказа
 
         Gson gson = new Gson();
-        String StringRequestOrder = gson.toJson(requestOrder); // эта библиотека превращает джава-объект в json строку (сериализация)
-        // передаем преобразованный в строку ответ
+        String StringRequestOrder = gson.toJson(requestOrder); // превращаем джава-объект в json строку, сохраняем в переменную и передаем (сериализация)
+
 
         Response response = given(). // REST assured может возвращать объекты в виде класса response
                 header("content-type", "application/json").body(StringRequestOrder).
                 post(SwaggerTestUrl + "/test-orders").
-                then().extract().response();
+                then().extract().response(); // извлекаем ответ в виде Json строки
 
-        TestOrder responseOrder = gson.fromJson(response.body().asString(), TestOrder.class); // десериализуем ответ в формате json строки
+        TestOrder responseOrder = gson.fromJson(response.body().asString(), TestOrder.class); // десериализуем ответ в обратно в java объект
         Assertions.assertEquals(responseOrder.getStatus(), "OPEN", "error"); // проверяем статус созданного заказа
         System.out.println(responseOrder.toString());
     }
 
 
+    // здесь для удобства логика теста вынесена в отдельный класс TestOrderFunction
+    @Test
+    public void postSecondOrder() {
+        TestOrder requestOrder2 = new TestOrder("OPEN", "Dmitriy", "2222222", "correct request2"); // передаем данные
+        TestOrderFunction testOrderFunction = new TestOrderFunction(); // создаем объект класса TestOrderFunction, в котором хранится логика
+        TestOrder responseOrder2 = testOrderFunction.postOrder(requestOrder2, 200); // проверяем код ответа
+        Assertions.assertEquals(responseOrder2.getStatus(), "OPEN", "Incorrect status"); // проверяем статус
+        System.out.println(responseOrder2.toString()); // вывели на экран в читабельном виде
 
-    // 1) проверка успешной авторизации (получение токена авторизации),
-    // 2) проверка успешного создания нового заказа (получение токена создания заказа)
+    }
+
+
+
+    // авторизация пользователя (получение токена в случае успешной авторизации),
+    // создание нового заказа, проверка его статус кода и статуса
     @Test
     public void checkLoginEndPointWithCorrectData() {
 
         Gson gson = new Gson();
         UserData userData = new UserData("user2", "hellouser2");
 
-        String token = given().
+        String token = given(). // полученный ответ сохраняем в переменную token
                 header("content-type", "application/json").
                 body(gson.toJson(userData)).
                 when().
                 post(SwaggerTestUrl + "/login/student").
                 then().
-                // log().all().
+                // log().all(). // при необходимости включаем логирование
                 assertThat().
                 statusCode(HttpStatus.SC_OK).
                 extract().response().asString();
-        Assertions.assertNotNull(token);
-        System.out.println(token);
+        // Assertions.assertNotNull(token);  при необходимости проверяем, что пришел верный токен
+        // System.out.println(token);
 
-        TestOrder2 testOrder2 = new TestOrder2("0", "Konstantin", "111111", "comment1", "OPEN");
-        given().
+        TestOrder testOrder3 = new TestOrder("OPEN", "Sergey", "333333", "correct request3");
+        Response response = given(). // создаем новый заказ
                 header("content-type", "application/json").
-                header("Authorization", "Bearer "+ token).
-                body(gson.toJson(testOrder2)).
+                header("Authorization", "Bearer "+ token). // для успешного создания заказа передаем полученный токен
+                body(gson.toJson(testOrder3)).
                 when().
                 post(SwaggerTestUrl + "/orders").
-                then().
-                log().all().
-                assertThat().
-                statusCode(HttpStatus.SC_OK);
-        Assertions.assertNotNull(token);
-        System.out.println(token);
+                then().assertThat().statusCode(200).
+                extract().response();
+        TestOrder responseOrder = gson.fromJson(response.body().asString(), TestOrder.class);
+        Assertions.assertEquals(responseOrder.getStatus(), "OPEN", "error"); // проверяем статус созданного заказа
+        System.out.println(responseOrder.toString());
+
     }
 
 
@@ -120,7 +128,6 @@ public class APITests {
     }
 
 }
-
 
 
 
