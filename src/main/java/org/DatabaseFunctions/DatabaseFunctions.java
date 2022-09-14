@@ -7,6 +7,21 @@ import java.sql.*;
 import java.util.Properties;
 
 public class DatabaseFunctions {
+
+
+    /*
+    // тестовый запрос к базе данных на выведение списка 100 пользователей
+
+    public void NewSelectUsers ()
+    {
+        DatabaseFunctions databaseFunctions = new DatabaseFunctions(); // создаем новый объект класса
+        databaseFunctions.selectUsers(); // вызываем для него метод selectUsers,
+        // который соединяется с базой и выводит список 100 пользователей (согласно установленному лимиту)
+    }
+*/
+
+
+
     private String dbUrl;
     private String dbUser;
     private String dbPassword;

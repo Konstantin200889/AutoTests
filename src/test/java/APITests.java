@@ -1,6 +1,5 @@
 import com.google.gson.Gson;
 import io.restassured.response.Response;
-import org.DatabaseFunctions.DatabaseFunctions;
 import org.apache.hc.core5.http.HttpStatus;
 import org.example.api.TestOrderFunction;
 import org.example.dto.TestOrder;
@@ -16,7 +15,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 public class APITests {
 
-// параметризированный тест (подгружаем данные из файла test.csv и проверяем корректность заполнение полей при помощи Assertions)
+    // параметризированный тест (подгружаем данные из файла test.csv и проверяем корректность заполнение полей при помощи Assertions)
     @ParameterizedTest
     @CsvFileSource(resources = "/test.csv", useHeadersInDisplayName = true)
     void testWithCsvFileSourceAndHeaders(String Login, String Password, String Role) {
@@ -32,26 +31,26 @@ public class APITests {
 
 
     private String SwaggerTestUrl = "*****";
+    private final static String ORDER_OPEN_STATUS = "OPEN";
 
-   // проверка статуса определенного заказа
+    // проверка статуса определенного заказа
     @Test
-    public void getFirstOrder()
-    {
+    public void getTestOrderDataAndCheckId() {
         when().
                 get(SwaggerTestUrl + "/test-orders/{id}", 4).
                 then().
                 statusCode(200).
-                body("status", equalTo("OPEN"),
+                body("status", equalTo(ORDER_OPEN_STATUS),
                         "courierId", equalTo(null),
                         "id", equalTo(4));
     }
 
 
-// создание нового заказа и проверка его статуса
+    // создание нового заказа и проверка его статуса
     @Test
-    public void postFirstOrder() {
+    public void createFirstOrderFullTest() {
 
-        TestOrder requestOrder = new TestOrder("OPEN", "Konstantin", "111111", "correct request"); // заполняем данные полей заказа
+        TestOrder requestOrder = new TestOrder(ORDER_OPEN_STATUS, "Konstantin", "111111", "correct request"); // заполняем данные полей заказа
 
         Gson gson = new Gson();
         String StringRequestOrder = gson.toJson(requestOrder); // превращаем джава-объект в json строку, сохраняем в переменную и передаем (сериализация)
@@ -63,22 +62,21 @@ public class APITests {
                 then().extract().response(); // извлекаем ответ в виде Json строки
 
         TestOrder responseOrder = gson.fromJson(response.body().asString(), TestOrder.class); // десериализуем ответ в обратно в java объект
-        Assertions.assertEquals(responseOrder.getStatus(), "OPEN", "error"); // проверяем статус созданного заказа
+        Assertions.assertEquals(responseOrder.getStatus(), ORDER_OPEN_STATUS, "error"); // проверяем статус созданного заказа
         System.out.println(responseOrder.toString());
     }
 
 
     // здесь для удобства логика теста вынесена в отдельный класс TestOrderFunction
     @Test
-    public void postSecondOrder() {
-        TestOrder requestOrder2 = new TestOrder("OPEN", "Dmitriy", "2222222", "correct request2"); // передаем данные
+    public void createSecondOrderCompactTest() {
+        TestOrder requestOrder2 = new TestOrder(ORDER_OPEN_STATUS, "Dmitriy", "2222222", "correct request2"); // передаем данные
         TestOrderFunction testOrderFunction = new TestOrderFunction(); // создаем объект класса TestOrderFunction, в котором хранится логика
         TestOrder responseOrder2 = testOrderFunction.postOrder(requestOrder2, 200); // проверяем код ответа
-        Assertions.assertEquals(responseOrder2.getStatus(), "OPEN", "Incorrect status"); // проверяем статус
+        Assertions.assertEquals(responseOrder2.getStatus(), ORDER_OPEN_STATUS, "Incorrect status"); // проверяем статус
         System.out.println(responseOrder2.toString()); // вывели на экран в читабельном виде
 
     }
-
 
 
     // авторизация пользователя (получение токена в случае успешной авторизации),
@@ -96,38 +94,30 @@ public class APITests {
                 post(SwaggerTestUrl + "/login/student").
                 then().
                 // log().all(). // при необходимости включаем логирование
-                assertThat().
+                        assertThat().
                 statusCode(HttpStatus.SC_OK).
                 extract().response().asString();
         // Assertions.assertNotNull(token);  при необходимости проверяем, что пришел верный токен
         // System.out.println(token);
 
-        TestOrder testOrder3 = new TestOrder("OPEN", "Sergey", "333333", "correct request3");
+        TestOrder testOrder3 = new TestOrder(ORDER_OPEN_STATUS, "Sergey", "333333", "correct request3");
         Response response = given(). // создаем новый заказ
                 header("content-type", "application/json").
-                header("Authorization", "Bearer "+ token). // для успешного создания заказа передаем полученный токен
-                body(gson.toJson(testOrder3)).
+                header("Authorization", "Bearer " + token). // для успешного создания заказа передаем полученный токен
+                        body(gson.toJson(testOrder3)).
                 when().
                 post(SwaggerTestUrl + "/orders").
                 then().assertThat().statusCode(200).
                 extract().response();
         TestOrder responseOrder = gson.fromJson(response.body().asString(), TestOrder.class);
-        Assertions.assertEquals(responseOrder.getStatus(), "OPEN", "error"); // проверяем статус созданного заказа
+        Assertions.assertEquals(responseOrder.getStatus(), ORDER_OPEN_STATUS, "error"); // проверяем статус созданного заказа
         System.out.println(responseOrder.toString());
 
     }
-
-
-    // тестовый запрос к базе данных на выведение списка 100 пользователей
-    @Test
-    public void NewSelectUsers ()
-    {
-        DatabaseFunctions databaseFunctions = new DatabaseFunctions(); // создаем новый объект класса
-        databaseFunctions.selectUsers(); // вызываем для него метод selectUsers,
-        // который соединяется с базой и выводит список 100 пользователей (согласно установленному лимиту)
-    }
-
 }
+
+
+
 
 
 
