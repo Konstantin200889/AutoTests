@@ -1,32 +1,41 @@
 import com.google.gson.Gson;
+import groovy.util.logging.Slf4j;
 import io.restassured.response.Response;
 import org.apache.hc.core5.http.HttpStatus;
+import org.assertj.core.api.SoftAssertions;
 import org.example.api.TestOrderFunction;
 import org.example.dto.TestOrder;
 import org.example.dto.UserData;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static java.lang.String.format;
 import static org.hamcrest.Matchers.equalTo;
 
+@Slf4j
 public class APITests {
+    private static final Logger log = LoggerFactory.getLogger(APITests.class);
 
     // параметризированный тест (подгружаем данные из файла test.csv и проверяем корректность заполнение полей при помощи Assertions)
     @ParameterizedTest
+    @Tag("smoke")
+    @Tag("positive")
     @CsvFileSource(resources = "/test.csv", useHeadersInDisplayName = true)
-    void testWithCsvFileSourceAndHeaders(String Login, String Password, String Role) {
-        String a = Login + " " + Password + " " + Role;
-        System.out.println(a);
-        Assertions.assertNotNull(Login);
-        Assertions.assertNotNull(Password);
-        Assertions.assertNotNull(Role);
-        Assertions.assertNotEquals(" ", Login);
-        Assertions.assertNotEquals(" ", Password);
-        Assertions.assertNotEquals(" ", Role);
+    void testWithCsvFileSourceAndHeaders(String login, String password, String role) {
+        String loginStr = format("Login: %s %nPassword: %s %nRole: %s", login, password, role);
+        log.info(loginStr);
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(login).as("Login should be not null").isNotNull();
+        softAssertions.assertThat(password).as("password should be not null").isNotNull();
+        softAssertions.assertThat(role).as("role should be not null").isNotNull();
+        softAssertions.assertAll();
     }
 
 

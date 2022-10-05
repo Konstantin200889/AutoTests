@@ -34,8 +34,7 @@ public class TestOrderFunction
 
 
 
-    public TestOrder postOrder(TestOrder body, int headers)
-    {
+    public TestOrder postOrder(TestOrder body, int headers) {
         Gson gson = new Gson();
         String StringRequestOrder = gson.toJson(body);
 
@@ -47,8 +46,6 @@ public class TestOrderFunction
                 then().statusCode(200).extract().response();
 
         return gson.fromJson(response.body().asString(), TestOrder.class);
-
-
 
     }
 }
