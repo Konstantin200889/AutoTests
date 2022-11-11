@@ -30,7 +30,7 @@ public class APITests {
     }
 
 
-    private String SwaggerTestUrl = "*****";
+    private String SwaggerTestUrl = "http://51.250.6.164:8080/swagger-ui/index.html";
     private final static String ORDER_OPEN_STATUS = "OPEN";
 
     // проверка статуса определенного заказа
@@ -80,7 +80,7 @@ public class APITests {
 
 
     // авторизация пользователя (получение токена в случае успешной авторизации),
-    // создание нового заказа, проверка его статус кода и статуса
+    // далее создание нового заказа, проверка его статус кода и статуса
     @Test
     public void checkLoginEndPointWithCorrectData() {
 

@@ -12,7 +12,7 @@ import static com.codeborne.selenide.Selenide.open;
 
 public class UITests {
 
-private String SignInUrl = "*****";
+private String SignInUrl = "http://51.250.6.164:3000/signin";
 
 
     // тест, написанный напрямую через selenide, без использования page object
@@ -57,7 +57,7 @@ private String SignInUrl = "*****";
 
 
     // негативный тест (передаются неверные логин и пароль, нажимается кнопка авторизации,
-    // затем происходит проверка отображения нотификации "ошибка авторизации" ('authorizationError-popup-close-button')
+    // затем происходит проверка отображения нотификации "ошибка авторизации"
     @Test
     public void userAuthError () {
         Configuration.browser = "firefox";
@@ -70,7 +70,7 @@ private String SignInUrl = "*****";
 
 
     // E2E тест: авторизация, создание нового заказа,
-    // проверка корректности переданных в теле заказа данных клиента (поля Name,Phone,Comment)
+    // проверка корректности переданных в теле заказа данных клиента
     @Test
     public void E2ETest() {
         Configuration.browser = "firefox";
